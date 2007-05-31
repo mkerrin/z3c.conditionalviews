@@ -1,0 +1,118 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           i18n_domain="zope">
+
+  <include zcml:condition="installed zope.app.zcmlfiles"
+           package="zope.app.zcmlfiles" />
+  <include zcml:condition="not-installed zope.app.zcmlfiles"
+           package="zope.app.zcmlfiles" />
+
+  <include package="zope.app.securitypolicy" file="meta.zcml" />
+  <include package="zope.app.securitypolicy" />
+  <include package="zope.app.authentication" />
+  <securityPolicy
+      component="zope.app.securitypolicy.zopepolicy.ZopeSecurityPolicy"
+      />
+  <unauthenticatedPrincipal
+      id="zope.anybody"
+      title="Unauthenticated User"
+      />
+
+  <role id="zope.Manager" title="Site Manager" />
+  <grantAll role="zope.Manager" />
+
+  <principal
+      id="zope.mgr"
+      title="Manager"
+      login="mgr"
+      password="mgrpw"
+      />
+  <grant
+      role="zope.Manager"
+      principal="zope.mgr"
+      />
+
+  <include package="z3c.conditionalviews" />
+
+  <!--
+      This view is used only for the tests to demonstrate how to use the
+      ConditionalView decorator. It is easier define the view here and to
+      let the browser:page directive setup all the neccessary security to
+      get this view to work.
+  -->
+
+  <browser:page
+      name="simpleview.html"
+      for="zope.interface.Interface"
+      class="z3c.conditionalviews.tests.Simpleview"
+      permission="zope.Public"
+      />
+
+  <!--
+      Test against the PUT method from zope.app.http. First we need to
+      configure some contents types and some adapters for this work
+      with the PUT method.
+  -->
+  <class class="z3c.conditionalviews.tests.File">
+    <require
+        permission="zope.View"
+        interface="z3c.conditionalviews.tests.IFile"
+        />
+
+    <require
+        permission="zope.ManageContent"
+        set_schema="z3c.conditionalviews.tests.IFile"
+        />
+
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+        />
+  </class>
+
+  <adapter
+      for="zope.app.folder.interfaces.IFolder"
+      provides="zope.filerepresentation.interfaces.IFileFactory"
+      factory="z3c.conditionalviews.tests.FileFactory"
+      permission="zope.ManageContent"
+      />
+
+  <adapter 
+      for="z3c.conditionalviews.tests.IFile"
+      provides="zope.filerepresentation.interfaces.IWriteFile"
+      factory="z3c.conditionalviews.tests.WriteFile"
+      permission="zope.ManageContent"
+      />
+
+  <browser:page
+      for="z3c.conditionalviews.tests.IFile"
+      class="z3c.conditionalviews.tests.ViewFile"
+      permission="zope.View"
+      name="index.html"
+      />
+
+  <!--
+      Setup up a conditional publication, so that every HTTP request
+      is validated with this package.
+  -->
+  <utility
+      component="z3c.conditionalviews.ConditionalHTTPRequest"
+      provides="zope.app.publication.interfaces.IHTTPRequestFactory"
+      />
+
+  <class class="z3c.conditionalviews.tests.FileETag">
+    <allow
+        interface="z3c.conditionalviews.interfaces.IETag"
+        />
+  </class>
+
+  <adapter
+      for="z3c.conditionalviews.tests.IFile
+           zope.publisher.interfaces.http.IHTTPRequest
+           zope.interface.Interface"
+      factory="z3c.conditionalviews.tests.FileETag"
+      provides="z3c.conditionalviews.interfaces.IETag"
+      trusted="1"
+      />
+
+</configure>

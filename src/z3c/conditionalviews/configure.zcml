@@ -1,0 +1,20 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <class class="z3c.conditionalviews.BoundConditionalView">
+    <require
+        attributes="__call__"
+        permission="zope.Public"
+        />
+  </class>
+
+  <utility
+      factory=".lastmodification.ModifiedSinceValidator"
+      name="http.modifiedsince"
+      />
+
+  <utility
+      factory=".etag.ETagValidator"
+      name="http.etag"
+      />
+
+</configure>

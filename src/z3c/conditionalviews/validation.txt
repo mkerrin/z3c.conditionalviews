@@ -1,0 +1,157 @@
+====================================
+Validating conditional HTTP requests
+====================================
+
+RFC2626::
+
+  The semantics of the GET method change to a 'conditional GET' if the
+  request message includes an If-Modified-Since, If-Unmodified-Since,
+  If-Match, If-None-Match, or If-Range header field. A conditional GET
+  method requests that the entity be transferred only under the
+  circumstances described by the conditional header field(s).
+
+  >>> import z3c.conditionalviews
+  >>> import z3c.conditionalviews.interfaces
+
+  >>> import zope.interface
+  >>> import zope.interface.verify
+  >>> from zope.publisher.browser import BrowserView
+  >>> from zope.publisher.browser import TestRequest
+  >>> from zope.publisher.interfaces.http import IHTTPRequest
+  >>> from zope.publisher.interfaces.browser import IBrowserView
+
+A really simple view to test the conditional views.
+
+  >>> class SimpleView(BrowserView):
+  ...    @z3c.conditionalviews.ConditionalView
+  ...    def __call__(self):
+  ...        self.request.response.setStatus(200)
+  ...        return "xxxxx"
+
+  >>> class SimpleValidator(object):
+  ...    zope.interface.implements(
+  ...        z3c.conditionalviews.interfaces.IHTTPValidator)
+  ...    def __init__(self):
+  ...       self._header = 'COND_HEADER'
+  ...       self._value = True # default value for the `COND_HEADER`
+  ...    def evaluate(self, context, request, view):
+  ...        return request.get(self._header, None) is not None
+  ...    def valid(self, context, request, view):
+  ...        return request[self._header]
+  ...    def updateResponse(self, context, request, view):
+  ...        request.response.setHeader(self._header, self._value)
+  ...    def invalidStatus(self, context, request, view):
+  ...        return 304
+
+  >>> request = TestRequest()
+  >>> view = SimpleView(None, request)
+
+No validators registered so the view runs as normal.
+
+  >>> view()
+  'xxxxx'
+  >>> request.response.getStatus()
+  200
+  >>> request.response.getHeader('COND_HEADER', None) is None
+  True
+
+Now register the HTTP validator.
+
+  >>> simplevalidator = SimpleValidator()
+  >>> zope.interface.verify.verifyObject(
+  ...    z3c.conditionalviews.interfaces.IHTTPValidator, simplevalidator)
+  True
+  >>> zope.component.getGlobalSiteManager().registerUtility(
+  ...    simplevalidator, name = 'simplevalidator')
+
+  >>> view()
+  'xxxxx'
+  >>> request.response.getStatus()
+  200
+  >>> request.response.getHeader('COND_HEADER')
+  'True'
+
+Set the `COND_HEADER` in the request which should mark the request as
+invalid.
+
+  >>> request._environ['COND_HEADER'] = True
+  >>> view()
+  'xxxxx'
+  >>> request.response.getStatus()
+  200
+  >>> request.response.getHeader('COND_HEADER')
+  'True'
+
+Setting the COND_HEADER to false, indicates that the request is `invalid`
+and as such should not be executed.
+
+  >>> request._environ['COND_HEADER'] = False
+  >>> view()
+  ''
+  >>> request.response.getStatus()
+  304
+  >>> request.response.getHeader('COND_HEADER')
+  'True'
+
+If we have two validators registered in our application then.
+
+  >>> request = TestRequest(environ = {'COND_HEADER': True,
+  ...                                  'SECOND_COND_HEADER': False})
+  >>> view = SimpleView(None, request)
+  >>> view()
+  'xxxxx'
+
+  >>> class SimpleValidator2(SimpleValidator):
+  ...    def __init__(self):
+  ...        super(SimpleValidator2, self).__init__()
+  ...        self._header = 'SECOND_COND_HEADER'
+
+  >>> simplevalidator2 = SimpleValidator2()
+  >>> zope.interface.verify.verifyObject(
+  ...    z3c.conditionalviews.interfaces.IHTTPValidator, simplevalidator2)
+  True
+  >>> zope.component.getGlobalSiteManager().registerUtility(
+  ...    simplevalidator2, name = 'simplevalidator2')
+
+In this example the second validator should return False and 
+
+  >>> request = TestRequest(environ = {'COND_HEADER': True,
+  ...                                  'SECOND_COND_HEADER': False})
+  >>> view = SimpleView(None, request)
+  >>> view()
+  'xxxxx'
+
+  >>> request = TestRequest(environ = {'COND_HEADER': False,
+  ...                                  'SECOND_COND_HEADER': False})
+  >>> view = SimpleView(None, request)
+  >>> view()
+  ''
+  >>> request.response.getStatus()
+  304
+  >>> request.response.getHeader('COND_HEADER')
+  'True'
+  >>> request.response.getHeader('SECOND_COND_HEADER')
+  'True'
+
+If the conditional HTTP header corresponding to the second protocol is missing
+and the first protocol is invalid then we should treat this as if the
+second validator was unregistered.
+
+  >>> request = TestRequest(environ = {'COND_HEADER': False})
+  >>> view = SimpleView(None, request)
+  >>> view()
+  ''
+  >>> request.response.getStatus()
+  304
+  >>> request.response.getHeader('COND_HEADER')
+  'True'
+
+Cleanup
+-------
+
+  >>> zope.component.getGlobalSiteManager().unregisterUtility(
+  ...    simplevalidator, name = 'simplevalidator')
+  True
+  >>> zope.component.getGlobalSiteManager().unregisterUtility(
+  ...    simplevalidator2, name = 'simplevalidator2')
+  True
