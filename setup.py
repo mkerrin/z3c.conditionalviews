@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "z3c.conditionalviews",
-    version = "0.8",
+    version = "0.9",
     author = "Michael Kerrin",
     author_email = "michael.kerrin@openapp.ie",
     url = "http://svn.zope.org/z3c.conditionalviews/",

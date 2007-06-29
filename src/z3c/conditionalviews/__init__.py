@@ -34,8 +34,10 @@ def validate(context, request, func, viewobj, *args, **kw):
     for validator in validators:
         if validator.evaluate(context, request, viewobj):
             evaluated += 1
-            invalid += not validator.valid(context, request, viewobj)
-            invalidStatus = validator.invalidStatus(context, request, viewobj)
+            if not validator.valid(context, request, viewobj):
+                invalid += 1
+                invalidStatus = validator.invalidStatus(
+                    context, request, viewobj)
 
     if evaluated > 0 and evaluated == invalid:
         # The request is invalid so we do not process it.
