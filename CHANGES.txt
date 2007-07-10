@@ -1,0 +1,13 @@
+===============================
+Changes in z3c.conditionalviews
+===============================
+
+1.0b
+====
+
+- Fixed time zone issue in processing `If-Modified` protocol.
+
+0.9
+===
+
+- Initial release.

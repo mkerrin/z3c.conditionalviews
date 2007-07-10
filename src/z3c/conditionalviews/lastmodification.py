@@ -10,7 +10,6 @@
 # FOR A PARTICULAR PURPOSE.
 ##############################################################################
 
-import time
 import calendar
 import zope.component
 import zope.datetime
@@ -28,7 +27,8 @@ class ModifiedSinceValidator(object):
       >>> from zope.publisher.browser import BrowserView
 
       >>> def format(dt):
-      ...    return zope.datetime.rfc1123_date(time.mktime(dt.utctimetuple()))
+      ...    return zope.datetime.rfc1123_date(
+      ...        calendar.timegm(dt.utctimetuple()))
 
       >>> lmt = datetime.datetime(2007, 1, 6, 13, 42, 12,
       ...    tzinfo = zope.datetime.tzinfo(60))
@@ -269,7 +269,7 @@ class ModifiedSinceValidator(object):
         headervalue = request.getHeader(header, None)
         if headervalue is not None:
             # current last modification time for this view
-            last_modification_time = long(time.mktime(mtime.utctimetuple()))
+            last_modification_time = long(calendar.timegm(mtime.utctimetuple()))
             try:
                 headervalue = long(zope.datetime.time(
                     headervalue.split(";", 1)[0]))
