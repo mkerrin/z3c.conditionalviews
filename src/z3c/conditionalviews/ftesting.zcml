@@ -8,8 +8,8 @@
   <include zcml:condition="not-installed zope.app.zcmlfiles"
            package="zope.app.zcmlfiles" />
 
-  <include package="zope.app.securitypolicy" file="meta.zcml" />
-  <include package="zope.app.securitypolicy" />
+  <include package="zope.securitypolicy" file="meta.zcml" />
+  <include package="zope.securitypolicy" />
   <include package="zope.app.authentication" />
 
   <securityPolicy
