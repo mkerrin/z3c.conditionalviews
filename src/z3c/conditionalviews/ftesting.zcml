@@ -11,9 +11,11 @@
   <include package="zope.app.securitypolicy" file="meta.zcml" />
   <include package="zope.app.securitypolicy" />
   <include package="zope.app.authentication" />
+
   <securityPolicy
-      component="zope.app.securitypolicy.zopepolicy.ZopeSecurityPolicy"
+      component="zope.securitypolicy.zopepolicy.ZopeSecurityPolicy"
       />
+
   <unauthenticatedPrincipal
       id="zope.anybody"
       title="Unauthenticated User"
