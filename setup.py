@@ -12,6 +12,12 @@ setup(
         "\n\n" +
         open("CHANGES.txt").read()),
     license = "ZPL 2.1",
+    classifiers = ["Environment :: Web Environment",
+                   "Intended Audience :: Developers",
+                   "License :: OSI Approved :: Zope Public License",
+                   "Programming Language :: Python",
+                   "Framework :: Zope3",
+                   ],
 
     packages = find_packages("src"),
     package_dir = {"": "src"},
