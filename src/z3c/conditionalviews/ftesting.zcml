@@ -102,18 +102,13 @@
       provides="zope.app.publication.interfaces.IHTTPRequestFactory"
       />
 
-  <class class="z3c.conditionalviews.tests.FileETag">
-    <allow
-        interface="z3c.conditionalviews.interfaces.IETag"
-        />
-  </class>
-
   <adapter
       for="z3c.conditionalviews.tests.IFile
            zope.publisher.interfaces.http.IHTTPRequest
            zope.interface.Interface"
       factory="z3c.conditionalviews.tests.FileETag"
       provides="z3c.conditionalviews.interfaces.IETag"
+      permission="zope.Public"
       trusted="1"
       />
 
