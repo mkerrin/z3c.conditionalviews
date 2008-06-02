@@ -62,7 +62,7 @@ class LastModificationDate(object):
     zope.interface.implements(interfaces.ILastModificationDate)
 
     def __init__(self, context, request, view):
-        self.dcadapter = zope.dublincore.interfaces.IZopeDublinCore(context)
+        self.dcadapter = zope.dublincore.interfaces.IDCTimes(context)
 
     @property
     def lastmodified(self):
