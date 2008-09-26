@@ -2,6 +2,13 @@
 Changes in z3c.conditionalviews
 ===============================
 
+1.0b2 (unreleased)
+==================
+
+- Using IDCTimes instead of IZopeDublinCore because IDCTimes is the actual
+  required interface.
+
+
 1.0b
 ====
 
