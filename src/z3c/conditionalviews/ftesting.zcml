@@ -11,6 +11,7 @@
   <include package="zope.securitypolicy" file="meta.zcml" />
   <include package="zope.securitypolicy" />
   <include package="zope.app.authentication" />
+  <include package="zope.login" />           
 
   <securityPolicy
       component="zope.securitypolicy.zopepolicy.ZopeSecurityPolicy"
