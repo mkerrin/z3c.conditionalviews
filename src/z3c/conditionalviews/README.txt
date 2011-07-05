@@ -185,7 +185,7 @@ We can now get the resource and the entity tag.
   >>> resp = http(r"""
   ... GET /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... """)
+  ... """, handle_errors = False)
   >>> resp.getStatus()
   200
   >>> resp.getHeader('ETag')
