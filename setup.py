@@ -22,13 +22,18 @@ setup(
     packages = find_packages("src"),
     package_dir = {"": "src"},
     namespace_packages = ["z3c"],
+
     install_requires = ["setuptools",
                         "zope.component",
-                        "zope.schema"],
-    extras_require = dict(test = ["zope.app.testing",
-                                  "zope.app.zcmlfiles",
-                                  "zope.securitypolicy",
-                                  ]),
+                        "zope.app.http",
+                        "zope.schema",
+                        ],
+
+    extras_require = dict(
+        test = ["zope.app.testing",
+                "zope.app.zcmlfiles",
+                "zope.securitypolicy",
+                ]),
 
     include_package_data = True,
     zip_safe = False,
