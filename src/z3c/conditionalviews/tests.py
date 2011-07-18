@@ -10,8 +10,8 @@
 # FOR A PARTICULAR PURPOSE.
 ##############################################################################
 
-import os
 import datetime
+import doctest
 import unittest
 
 import persistent
@@ -21,15 +21,10 @@ import zope.filerepresentation.interfaces
 import zope.annotation.interfaces
 import zope.publisher.browser
 from zope.security.proxy import removeSecurityProxy
-from zope.testing import doctest
-import zope.app.testing.functional
+import zope.app.wsgi.testlayer
 
 import z3c.conditionalviews
 import z3c.conditionalviews.interfaces
-
-here = os.path.dirname(os.path.realpath(__file__))
-ConditionalViewLayer = zope.app.testing.functional.ZCMLLayer(
-    os.path.join(here, "ftesting.zcml"), __name__, "ConditionalViewLayer")
 
 
 class Simpleview(zope.publisher.browser.BrowserView):
@@ -114,7 +109,7 @@ class LastModification(object):
 
 
 def integrationSetup(test):
-    test.globs["http"] = zope.app.testing.functional.HTTPCaller()
+    test.globs["http"] = zope.app.wsgi.testlayer.http
 
 
 def integrationTeardown(test):
@@ -127,7 +122,7 @@ def test_suite():
         setUp = integrationSetup,
         tearDown = integrationTeardown,
         optionflags = doctest.NORMALIZE_WHITESPACE)
-    readme.layer = ConditionalViewLayer
+    readme.layer = zope.app.wsgi.testlayer.BrowserLayer(z3c.conditionalviews)
 
     return unittest.TestSuite((
         doctest.DocFileSuite("validation.txt"),

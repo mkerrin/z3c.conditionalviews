@@ -35,8 +35,7 @@ the views call method with the `z3c.conditionalviews.ConditionalView` object.
 Note that all the views used in this test are defined in the ftesting.zcml
 file.
 
-  >>> response = http(r"""
-  ... GET /@@simpleview.html HTTP/1.1
+  >>> response = http(r"""GET /@@simpleview.html HTTP/1.1
   ... Host: localhost
   ... """, handle_errors = False)
   >>> response.getStatus()
@@ -70,8 +69,7 @@ Define our IETag implementation.
   ...     zope.publisher.interfaces.browser.IBrowserRequest,
   ...     zope.interface.Interface))
 
-  >>> response = http(r"""
-  ... GET /@@simpleview.html HTTP/1.1
+  >>> response = http(r"""GET /@@simpleview.html HTTP/1.1
   ... Host: localhost
   ... """, handle_errors = False)
   >>> response.getStatus()
@@ -89,8 +87,7 @@ Define our IETag implementation.
 Now by setting the request header If-None-Match: "3d32b-211-bab57a40", our
 view fails the validation and a 304 response is returned.
 
-  >>> response = http(r"""
-  ... GET /@@simpleview.html HTTP/1.1
+  >>> response = http(r"""GET /@@simpleview.html HTTP/1.1
   ... Host: localhost
   ... If-None-Match: "3d32b-211-bab57a40"
   ... """, handle_errors = False)
@@ -112,8 +109,7 @@ for this response.
 Now make sure that we haven't broken the publisher, by making sure that we
 can still pass arguments to the different views.
 
-  >>> response = http(r"""
-  ... GET /@@simpleview.html?letter=y HTTP/1.1
+  >>> response = http(r"""GET /@@simpleview.html?letter=y HTTP/1.1
   ... Host: localhost
   ... """, handle_errors = False)
   >>> response.getStatus()
@@ -140,8 +136,7 @@ header.
 The query string present in the following request causes the request to
 be valid, otherwise it would be invalid.
 
-  >>> response = http(r"""
-  ... GET /@@simpleview.html?letter=y HTTP/1.1
+  >>> response = http(r"""GET /@@simpleview.html?letter=y HTTP/1.1
   ... If-None-Match: "3d32b-211-bab57a40"
   ... Host: localhost
   ... """, handle_errors = False)
@@ -161,16 +156,16 @@ resource at a location.
 This has the added benifit in that we don't have to specify how some one
 implements the PUT method.
 
-  >>> resp = http(r"""
-  ... PUT /testfile HTTP/1.1
+  >>> resp = http(r"""PUT /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-type: text/plain
   ... Content-length: 55
+  ...
   ... aaaaaaaaaa
   ... aaaaaaaaaa
   ... aaaaaaaaaa
   ... aaaaaaaaaa
-  ... aaaaaaaaaa""", handle_errors = False)
+  ... aaaaaaaaaa""")
   >>> resp.getStatus()
   201
   >>> resp.getHeader('Content-length')
@@ -182,8 +177,7 @@ implements the PUT method.
  
 We can now get the resource and the entity tag.
 
-  >>> resp = http(r"""
-  ... GET /testfile HTTP/1.1
+  >>> resp = http(r"""GET /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """, handle_errors = False)
   >>> resp.getStatus()
@@ -199,8 +193,7 @@ We can now get the resource and the entity tag.
 
 We could have used the HEAD method to get the entity tag.
 
-  >>> resp = http(r"""
-  ... HEAD /testfile HTTP/1.1
+  >>> resp = http(r"""HEAD /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
@@ -210,11 +203,11 @@ We could have used the HEAD method to get the entity tag.
 
 With no 'If-None-Match' header we override the data.
 
-  >>> resp = http(r"""
-  ... PUT /testfile HTTP/1.1
+  >>> resp = http(r"""PUT /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-type: text/plain
   ... Content-length: 55
+  ...
   ... bbbbbbbbbb
   ... bbbbbbbbbb
   ... bbbbbbbbbb
@@ -229,8 +222,7 @@ With no 'If-None-Match' header we override the data.
   >>> resp.getHeader('ETag')
   '"testfile:2"'
 
-  >>> resp = http(r"""
-  ... GET /testfile HTTP/1.1
+  >>> resp = http(r"""GET /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
@@ -247,12 +239,12 @@ is no resource at the location specified in the request URI. If there is a
 resource at the location then a `412 Precondition Failed` response is
 returned and the resource is not modified'
 
-  >>> resp = http(r"""
-  ... PUT /testfile HTTP/1.1
+  >>> resp = http(r"""PUT /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... If-None-Match: "*"
   ... Content-type: text/plain
   ... Content-length: 55
+  ...
   ... cccccccccc
   ... cccccccccc
   ... cccccccccc
@@ -269,8 +261,7 @@ returned and the resource is not modified'
 
 The file does not change.
 
-  >>> resp = http(r"""
-  ... GET /testfile HTTP/1.1
+  >>> resp = http(r"""GET /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
@@ -284,12 +275,12 @@ The file does not change.
 
 And now since testfile2 does exist yet we content the content.
 
-  >>> resp = http(r"""
-  ... PUT /testfile2 HTTP/1.1
+  >>> resp = http(r"""PUT /testfile2 HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... If-None-Match: "*"
   ... Content-type: text/plain
   ... Content-length: 55
+  ...
   ... yyyyyyyyyy
   ... yyyyyyyyyy
   ... yyyyyyyyyy
@@ -304,8 +295,7 @@ And now since testfile2 does exist yet we content the content.
   >>> resp.getHeader('ETag', None) is None # No etag adapter is configured
   True
 
-  >>> resp = http(r"""
-  ... GET /testfile2 HTTP/1.1
+  >>> resp = http(r"""GET /testfile2 HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
@@ -320,8 +310,7 @@ And now since testfile2 does exist yet we content the content.
 We can now delete the resource, only if it hasn't changed. So for the
 '/testfile' resource we can use its first entity tag to confirm this.
 
-  >>> resp = http(r"""
-  ... DELETE /testfile HTTP/1.1
+  >>> resp = http(r"""DELETE /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... If-Match: "testfile:1"
   ... """)
@@ -330,8 +319,7 @@ We can now delete the resource, only if it hasn't changed. So for the
 
 And the file still exists.
 
-  >>> resp = http(r"""
-  ... GET /testfile HTTP/1.1
+  >>> resp = http(r"""GET /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
@@ -339,8 +327,7 @@ And the file still exists.
 
 But using a valid entity tag we can delete the resource.
 
-  >>> resp = http(r"""
-  ... DELETE /testfile HTTP/1.1
+  >>> resp = http(r"""DELETE /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... If-Match: "testfile:2"
   ... """)
@@ -349,8 +336,7 @@ But using a valid entity tag we can delete the resource.
   >>> resp.getBody()
   ''
 
-  >>> resp = http(r"""
-  ... GET /testfile HTTP/1.1
+  >>> resp = http(r"""GET /testfile HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
@@ -364,8 +350,7 @@ registered yet.
 
 We need to be logged in order to traverse to the file.
 
-  >>> resp = http(r"""
-  ... FROG /testfile2 HTTP/1.1
+  >>> resp = http(r"""FROG /testfile2 HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
   >>> resp.getStatus()
