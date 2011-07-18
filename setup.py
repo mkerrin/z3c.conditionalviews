@@ -27,12 +27,12 @@ setup(
                         "zope.component",
                         "zope.app.http",
                         "zope.schema",
+                        "zope.app.publication",
                         ],
 
     extras_require = dict(
-        test = ["zope.app.testing",
-                "zope.app.zcmlfiles",
-                "zope.securitypolicy",
+        test = ["zope.securitypolicy",
+                "zope.app.wsgi",
                 ]),
 
     include_package_data = True,
